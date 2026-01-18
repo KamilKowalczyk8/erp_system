@@ -5,6 +5,8 @@ import kamil.kowalczyk.erp_system.inventory.domain.product.dto.CreateProductDto;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.ProductDto;
 import kamil.kowalczyk.erp_system.inventory.domain.product.exception.InsufficientStockException;
 import kamil.kowalczyk.erp_system.inventory.domain.product.exception.ProductAlreadyExistsException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +41,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductDto> getAllProducts() {
-        return productRepository.findAll().stream()
+    public Page<ProductDto> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable)
                 .map(pr -> new ProductDto(
                         pr.getId(),
                         pr.getName(),
@@ -49,8 +51,24 @@ public class ProductService {
                         pr.getSkuCode(),
                         pr.getCreatedAt(),
                         pr.getUpdatedAt()
-                ))
-                .toList();
+                ));
+    }
+
+    @Transactional(readOnly = true)
+    public ProductDto getProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produkt o id" + id + " nie istnieje"));
+
+        return new ProductDto(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity(),
+                product.getSkuCode(),
+                product.getCreatedAt(),
+                product.getUpdatedAt()
+        );
+
     }
 
     @Transactional

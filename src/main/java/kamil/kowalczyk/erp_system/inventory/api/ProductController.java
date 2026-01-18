@@ -5,6 +5,9 @@ import kamil.kowalczyk.erp_system.inventory.domain.product.ProductService;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.CreateProductDto;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.ProductDto;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.UpdateStockDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +33,19 @@ class ProductController {
     }
 
     @GetMapping
-    @Operation(summary = "Pobierz wszystkie produkty", description = "Zwraca listę produktów w formacie DTO (bez danych wrażliwych).")
-    ResponseEntity<List<ProductDto>> getProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    @Operation(summary = "Pobierz wszystkie produkty", description = "Domyślnie 10 produktów na stronę, sortowane po ID.")
+    ResponseEntity<Page<ProductDto>> getProducts(
+            @PageableDefault(size = 20, sort = "id") Pageable pageable
+    ) {
+        return ResponseEntity.ok(productService.getAllProducts(pageable));
     }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Pobierz szczegóły produktu", description = "Zwraca pojedynczy produkt po ID.")
+    ResponseEntity<ProductDto> getOneProduct(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProduct(id));
+    }
+
 
     @PatchMapping("/{id}/stock")
     @Operation(summary = "Zaktualizuj stan magazynowy", description = "Dodatnia wartość -> Dostawa. Ujemna wartość -> Wydanie.")
