@@ -5,8 +5,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kamil.kowalczyk.erp_system.sales.domain.order.OrderService;
+import kamil.kowalczyk.erp_system.sales.domain.order.OrderStatus;
 import kamil.kowalczyk.erp_system.sales.domain.order.dto.CreateOrderDto;
 import kamil.kowalczyk.erp_system.sales.domain.order.dto.OrderDto;
+import kamil.kowalczyk.erp_system.sales.domain.order.dto.UpdateOrderStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,13 @@ class OrderController {
     @Operation(summary = "Pobierz zamówienie", description = "Pobiera wartości całego zamówienia razem z ich ceną całkowitą oraz produktami.")
     ResponseEntity<OrderDto> getOneOrder(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
+    }
+
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Zmień status zamówienia", description = "Jeśli status zostanie zmieniony na CANCELLED, system automatycznie zwróci towar do magazynu.")
+    ResponseEntity<Void> updateStatus(@PathVariable Long id,@RequestBody @Valid UpdateOrderStatus dto) {
+        orderService.updateOrderStatus(id, dto.newStatus());
+        return ResponseEntity.noContent().build();
     }
 
 }

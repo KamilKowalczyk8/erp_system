@@ -1,0 +1,61 @@
+### KROK 1: MAGAZYN - Dodajemy pierwszy produkt (Laptop)
+# Tworzymy produkt, bo baza jest pusta. Ustawiamy startowy stan na 10 sztuk.
+POST http://localhost:8080/api/inventory/products
+Content-Type: application/json
+
+{
+  "name": "Laptop Gamingowy",
+  "price": 4000.00,
+  "skuCode": "DELL-G15-001",
+  "stockQuantity": 10
+}
+
+### KROK 2: MAGAZYN - Sprawdzamy, czy produkt powstał
+# Powinieneś zobaczyć ID: 1 oraz stan magazynowy: 10.
+GET http://localhost:8080/api/inventory/products/1
+
+### KROK 3: MAGAZYN - Dostawa towaru (Opcjonalny test Patcha)
+# Dodajemy 5 sztuk. Stan powinien wzrosnąć z 10 na 15.
+PATCH http://localhost:8080/api/inventory/products/1/stock
+Content-Type: application/json
+
+{
+  "quantityChange": 5
+}
+
+### KROK 4: SPRZEDAŻ - Klient składa zamówienie
+# Kupujemy 2 laptopy.
+# Oczekiwany efekt: Utworzenie zamówienia i zdjęcie 2 sztuk z magazynu (zostanie 13).
+POST http://localhost:8080/api/sales/orders
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 7
+    }
+  ]
+}
+
+### KROK 5: SPRZEDAŻ - Oglądamy paragon (Szczegóły zamówienia)
+# Sprawdź pole "totalOrderValue". Powinno być 8000.00 (2 * 4000).
+GET http://localhost:8080/api/sales/orders/1
+
+### KROK 6: WERYFIKACJA MAGAZYNU
+# Sprawdzamy produkt. Stan powinien wynosić 13 (było 15, kupiliśmy 2).
+GET http://localhost:8080/api/inventory/products/1
+
+### KROK 7: ANULOWANIE ZAMÓWIENIA (Test Logiki Biznesowej)
+# Klient rezygnuje. Zmieniamy status na CANCELLED.
+# Oczekiwany efekt: Status się zmienia, a 2 laptopy WRACAJĄ na stan (zrobi się znowu 15).
+PATCH http://localhost:8080/api/sales/orders/1/status
+Content-Type: application/json
+
+{
+  "newStatus": "CANCELLED"
+}
+
+### KROK 8: FINALNA WERYFIKACJA
+# Sprawdzamy czy towar wrócił. Stan musi wynosić znowu 15.
+GET http://localhost:8080/api/inventory/products/1

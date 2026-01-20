@@ -20,6 +20,7 @@ public class Order {
     private Long id;
 
     private LocalDateTime createdAt;
+    private  LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
@@ -30,6 +31,16 @@ public class Order {
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
+    }
+
+    @PrePersist
+    public void PrePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
 }

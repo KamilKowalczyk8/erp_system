@@ -1,33 +1,34 @@
-package kamil.kowalczyk.erp_system.inventory.domain.product;
-
+package kamil.kowalczyk.erp_system.client.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-public class Product {
+public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private BigDecimal price;
-
-    private Integer stockQuantity;
-
-    private String skuCode;
-
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phoneNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public Client(String firstName, String lastName, String email, String phoneNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
 
     @PrePersist
     public void PrePersist() {

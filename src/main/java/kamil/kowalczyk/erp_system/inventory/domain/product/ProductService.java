@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -22,7 +23,6 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    @Transactional
     public Long createProduct(CreateProductDto dto) {
 
         if (productRepository.existsBySkuCode(dto.skuCode())) {
@@ -71,7 +71,6 @@ public class ProductService {
 
     }
 
-    @Transactional
     public void updateStock(Long id, Integer quantityChange) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produkt nie istnieje!"));
