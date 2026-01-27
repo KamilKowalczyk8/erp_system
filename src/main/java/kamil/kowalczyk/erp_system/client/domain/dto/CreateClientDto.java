@@ -12,6 +12,6 @@ public record CreateClientDto(
         @NotBlank(message = "Email jest wymagany")
         String email,
 
-        String honeNumber
+        String phoneNumber
 
 ) {}

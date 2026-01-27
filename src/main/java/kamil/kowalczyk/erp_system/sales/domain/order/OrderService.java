@@ -1,5 +1,7 @@
 package kamil.kowalczyk.erp_system.sales.domain.order;
 
+import kamil.kowalczyk.erp_system.client.domain.Client;
+import kamil.kowalczyk.erp_system.client.domain.ClientService;
 import kamil.kowalczyk.erp_system.inventory.domain.product.ProductService;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.ProductDto;
 import kamil.kowalczyk.erp_system.sales.domain.order.dto.CreateOrderDto;
@@ -8,12 +10,10 @@ import kamil.kowalczyk.erp_system.sales.domain.order.dto.OrderDto;
 import kamil.kowalczyk.erp_system.sales.domain.order.dto.OrderItemDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableArgumentResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,21 +22,24 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductService productService;
-    private final PageableArgumentResolver pageableArgumentResolver;
+    private final ClientService clientService;
 
-    public OrderService(OrderRepository orderRepository, ProductService productService, PageableArgumentResolver pageableArgumentResolver) {
+    public OrderService(OrderRepository orderRepository, ProductService productService, ClientService clientService) {
         this.orderRepository = orderRepository;
         this.productService = productService;
-        this.pageableArgumentResolver = pageableArgumentResolver;
+        this.clientService = clientService;
     }
 
     public Long placeOrder(CreateOrderDto dto) {
-        Order order = new Order();
-        order.setCreatedAt(LocalDateTime.now());
-        order.setStatus(OrderStatus.NEW);
+        Client client = clientService.getClient(dto.clientId());
+        Order order = new Order(client, OrderStatus.NEW);
 
         for (CreateOrderItemDto itemDto : dto.items()) {
             ProductDto product = productService.getProduct(itemDto.productId());
+
+            if (product.stockQuantity() < itemDto.quantity()) {
+                throw new RuntimeException("Brak wystarczającej ilość" + product.name());
+            }
 
             productService.updateStock(product.id(), -itemDto.quantity());
 
@@ -53,32 +56,16 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderDto getOrderById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Zamówienie"));
+                .orElseThrow(() -> new RuntimeException("Zamówienie nie istnieje"));
 
-        List<OrderItemDto> itemsDtos = order.getItems().stream()
-                .map(item -> {
-                    BigDecimal calculatedTotalPrice = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+        return mapToDto(order);
+    }
 
-                    return new OrderItemDto(
-                            item.getProductId(),
-                            item.getQuantity(),
-                            item.getUnitPrice(),
-                            calculatedTotalPrice
-                    );
-                })
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<OrderDto> getAllOrders(Pageable pageable) {
+        Page<Order> orders = orderRepository.findAll(pageable);
 
-        BigDecimal finalOrderValue = itemsDtos.stream()
-                .map(OrderItemDto::totalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return new OrderDto(
-                order.getId(),
-                order.getCreatedAt(),
-                order.getStatus(),
-                itemsDtos,
-                finalOrderValue
-        );
+        return orders.map(this::mapToDto);
     }
 
     public void updateOrderStatus(Long orderId, OrderStatus newStatus){
@@ -97,32 +84,32 @@ public class OrderService {
         order.setStatus(newStatus);
     }
 
-    @Transactional(readOnly = true)
-    public Page<OrderDto> getAllOrders(Pageable pageable) {
-        Page<Order> orders = orderRepository.findAll(pageable);
-
-
-        return orders.map(order -> {
-            List<OrderItemDto> itemDtos = order.getItems().stream()
-                    .map(item -> new OrderItemDto(
+    private OrderDto mapToDto(Order order) {
+        List<OrderItemDto> itemDtos = order.getItems().stream()
+                .map(item -> {
+                    BigDecimal calculatedTotalPrice = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                    return new OrderItemDto(
                             item.getProductId(),
                             item.getQuantity(),
                             item.getUnitPrice(),
-                            item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
-                    ))
-                    .toList();
+                            calculatedTotalPrice
+                    );
+                })
+                .toList();
 
-            BigDecimal totalValue = itemDtos.stream()
-                    .map(OrderItemDto::totalPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal finalOrderValue = itemDtos.stream()
+                .map(OrderItemDto::totalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            return new OrderDto(
-                    order.getId(),
-                    order.getCreatedAt(),
-                    order.getStatus(),
-                    itemDtos,
-                    totalValue
-            );
-        });
+        return new OrderDto(
+                order.getId(),
+                order.getCreatedAt(),
+                order.getStatus(),
+                order.getClient().getId(),
+                order.getClient().getFirstName() + " " + order.getClient().getLastName(),
+                order.getClient().getEmail(),
+                itemDtos,
+                finalOrderValue
+        );
     }
 }

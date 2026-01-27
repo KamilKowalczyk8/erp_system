@@ -10,6 +10,11 @@ public record OrderDto(
         Long id,
         LocalDateTime createdAt,
         OrderStatus status,
+
+        Long clientId,
+        String clientName,
+        String clientEmail,
+
         List<OrderItemDto> items,
         BigDecimal totalOrderValue
 ) {}

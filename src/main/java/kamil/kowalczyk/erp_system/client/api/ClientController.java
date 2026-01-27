@@ -1,0 +1,36 @@
+package kamil.kowalczyk.erp_system.client.api;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import kamil.kowalczyk.erp_system.client.domain.ClientService;
+import kamil.kowalczyk.erp_system.client.domain.dto.CreateClientDto;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+
+@RestController
+@RequestMapping("/api/clients")
+@Tag(name = "Klienci", description = "Zarządzanie bazą klientów (CRM)")
+class ClientController {
+
+    private final ClientService clientService;
+
+    ClientController(ClientService clientService) {
+        this.clientService = clientService;
+    }
+
+    @PostMapping
+    @Operation(summary = "Dodaj nowego klienta", description = "Zwraca ID nowo utworzonego klienta.")
+    ResponseEntity<Long> createClient(@RequestBody @Valid CreateClientDto dto) {
+        Long clientId = clientService.createClient(dto);
+
+        return ResponseEntity
+                .created(URI.create("/api/clients/" + clientId))
+                .body(clientId);
+    }
+}
