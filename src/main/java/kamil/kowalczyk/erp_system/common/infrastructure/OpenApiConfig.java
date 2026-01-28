@@ -1,4 +1,4 @@
-package kamil.kowalczyk.erp_system.inventory.infrastructure;
+package kamil.kowalczyk.erp_system.common.infrastructure;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

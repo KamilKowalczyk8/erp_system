@@ -4,10 +4,7 @@ import kamil.kowalczyk.erp_system.client.domain.Client;
 import kamil.kowalczyk.erp_system.client.domain.ClientService;
 import kamil.kowalczyk.erp_system.inventory.domain.product.ProductService;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.ProductDto;
-import kamil.kowalczyk.erp_system.sales.domain.order.dto.CreateOrderDto;
-import kamil.kowalczyk.erp_system.sales.domain.order.dto.CreateOrderItemDto;
-import kamil.kowalczyk.erp_system.sales.domain.order.dto.OrderDto;
-import kamil.kowalczyk.erp_system.sales.domain.order.dto.OrderItemDto;
+import kamil.kowalczyk.erp_system.sales.domain.order.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -66,6 +63,30 @@ public class OrderService {
         Page<Order> orders = orderRepository.findAll(pageable);
 
         return orders.map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderDto> getOrdersByClient(Long clientId) {
+        clientService.getClient(clientId);
+
+        return orderRepository.findAllByClientId(clientId)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SalesReportDto getSalesReport() {
+        List<Order> allOrders = orderRepository.findAll();
+
+        long totalOrders = allOrders.size();
+
+        BigDecimal totalRevenue = allOrders.stream()
+                .flatMap(order -> order.getItems().stream())
+                .map(orderItem -> orderItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new SalesReportDto(totalOrders, totalRevenue);
     }
 
     public void updateOrderStatus(Long orderId, OrderStatus newStatus){

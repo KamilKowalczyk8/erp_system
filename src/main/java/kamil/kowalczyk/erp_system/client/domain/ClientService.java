@@ -1,6 +1,7 @@
 package kamil.kowalczyk.erp_system.client.domain;
 
 import kamil.kowalczyk.erp_system.client.domain.dto.CreateClientDto;
+import kamil.kowalczyk.erp_system.common.infrastructure.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +28,7 @@ public class ClientService {
     @Transactional(readOnly = true)
     public Client getClient(Long id) {
         return clientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Klient o id " + id + " nie istnieje!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Klient o id " + id + " nie istnieje!"));
     }
 
 

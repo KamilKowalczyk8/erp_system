@@ -10,6 +10,26 @@ services:
       - POSTGRES_DB=erp_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U erp_user -d erp_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+  app:
+    container_name: erp_backend
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/erp_db
+      - SPRING_DATASOURCE_USERNAME=erp_user
+      - SPRING_DATASOURCE_PASSWORD=erp_password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
 volumes:
   postgres_data:

@@ -3,13 +3,11 @@ package kamil.kowalczyk.erp_system.client.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import kamil.kowalczyk.erp_system.client.domain.Client;
 import kamil.kowalczyk.erp_system.client.domain.ClientService;
 import kamil.kowalczyk.erp_system.client.domain.dto.CreateClientDto;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -32,5 +30,11 @@ class ClientController {
         return ResponseEntity
                 .created(URI.create("/api/clients/" + clientId))
                 .body(clientId);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Pobranie danego klienta", description = "Pokazuje danego klienta")
+    public ResponseEntity<Client> getClient(@PathVariable Long id) {
+        return ResponseEntity.ok(clientService.getClient(id));
     }
 }

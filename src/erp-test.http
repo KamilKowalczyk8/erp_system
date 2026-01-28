@@ -27,7 +27,7 @@ POST http://localhost:8080/api/sales/orders
 Content-Type: application/json
 
 {
-  "clientId": 1,
+  "clientId": 3,
   "items": [
     {
       "productId": 1,
@@ -40,3 +40,10 @@ Content-Type: application/json
 # Sprawdź w odpowiedzi JSON, czy widzisz pola: "clientName": "Jan Kowalski" i "clientEmail".
 # Jeśli tak -> SUKCES! Połączyliśmy moduły.
 GET http://localhost:8080/api/sales/orders/1
+
+
+### KROK 5: Pobieranie wszysktich zamówień danego klienta
+GET http://localhost:8080/api/sales/orders/client/1
+
+### KROK 6: Pobieranie danego klienta
+GET http://localhost:8080/api/clients/99
