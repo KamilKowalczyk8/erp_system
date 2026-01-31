@@ -7,8 +7,9 @@ public record CreateOrderItemDto(
     @NotNull(message = "Musisz podac id produktu")
     Long productId,
 
+    @NotNull(message = "Stan magazynowy jest wymagany")
     @Positive(message = "Ilość musi być większa od zera")
     Integer quantity
-    ) {}
+) {}
 
 

@@ -14,6 +14,14 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class Product {
+
+    public Product(String name, BigDecimal price, int stockQuantity, String skuCode) {
+        this.name = name;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+        this.skuCode = skuCode;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

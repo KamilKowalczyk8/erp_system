@@ -47,3 +47,14 @@ GET http://localhost:8080/api/sales/orders/client/1
 
 ### KROK 6: Pobieranie danego klienta
 GET http://localhost:8080/api/clients/99
+
+### KROK 7: Próba dodania błędnego produktu (Walidacja)
+POST http://localhost:8080/api/inventory/products
+Content-Type: application/json
+
+{
+  "name": "A",
+  "price": -100.00,
+  "skuCode": "",
+  "stockQuantity": -5
+}
