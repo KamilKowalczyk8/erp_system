@@ -1,6 +1,7 @@
 package kamil.kowalczyk.erp_system.inventory.domain.product;
 
 
+import kamil.kowalczyk.erp_system.common.infrastructure.ResourceNotFoundException;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.CreateProductDto;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.ProductDto;
 import kamil.kowalczyk.erp_system.inventory.domain.product.exception.InsufficientStockException;
@@ -71,6 +72,23 @@ public class ProductService {
 
     }
 
+    public ProductDto decreaseStock(Long productId, int quantityToDecrease) {
+        Product product = productRepository.findById((productId))
+                .orElseThrow(() -> new ResourceNotFoundException("Nie znaleziono takiego produktu"));
+
+        if (product.getStockQuantity() < quantityToDecrease) {
+            throw new InsufficientStockException(
+                    product.getSkuCode(),
+                    product.getStockQuantity(),
+                    quantityToDecrease
+            );
+        }
+
+        product.setStockQuantity(product.getStockQuantity() - quantityToDecrease);
+        Product savedProduct = productRepository.save(product);
+        return mapToDto(savedProduct);
+    }
+
     public void updateStock(Long id, Integer quantityChange) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produkt nie istnieje!"));
@@ -85,6 +103,18 @@ public class ProductService {
             );
         }
         product.setStockQuantity(newQuantity);
+    }
+
+    private ProductDto mapToDto(Product product) {
+        return new ProductDto(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity(),
+                product.getSkuCode(),
+                product.getCreatedAt(),
+                product.getUpdatedAt()
+        );
     }
 
 }

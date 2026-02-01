@@ -32,23 +32,19 @@ public class OrderService {
         Order order = new Order(client, OrderStatus.NEW);
 
         for (CreateOrderItemDto itemDto : dto.items()) {
-            ProductDto product = productService.getProduct(itemDto.productId());
+           ProductDto product = productService.decreaseStock(itemDto.productId(), itemDto.quantity());
 
-            if (product.stockQuantity() < itemDto.quantity()) {
-                throw new RuntimeException("Brak wystarczającej ilość" + product.name());
-            }
+           OrderItem orderItem = new OrderItem();
+           orderItem.setProductId(product.id());
+           orderItem.setQuantity(itemDto.quantity());
+           orderItem.setUnitPrice(product.price());
 
-            productService.updateStock(product.id(), -itemDto.quantity());
-
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(product.id());
-            orderItem.setQuantity(itemDto.quantity());
-            orderItem.setUnitPrice(product.price());
-
-            order.addItem(orderItem);
+           order.addItem(orderItem);
         }
         return orderRepository.save(order).getId();
     }
+
+
 
     @Transactional(readOnly = true)
     public OrderDto getOrderById(Long id) {
