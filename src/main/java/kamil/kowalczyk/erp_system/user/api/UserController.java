@@ -4,6 +4,7 @@ package kamil.kowalczyk.erp_system.user.api;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import kamil.kowalczyk.erp_system.user.domain.UserService;
+import kamil.kowalczyk.erp_system.user.domain.dto.LoginUserDto;
 import kamil.kowalczyk.erp_system.user.domain.dto.RegisterUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,5 +25,12 @@ class UserController {
     ResponseEntity<Long> registerUser(@RequestBody @Valid RegisterUserDto dto) {
         Long newUserId = userService.registerUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUserId);
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Logowanie użytkownika", description = "Logujemy użytkownika do systemu")
+    ResponseEntity<String> loginUser(@RequestBody @Valid LoginUserDto dto) {
+        String token = userService.loginUser(dto);
+        return ResponseEntity.ok(token);
     }
 }

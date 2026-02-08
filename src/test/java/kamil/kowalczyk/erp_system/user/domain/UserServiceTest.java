@@ -1,5 +1,7 @@
 package kamil.kowalczyk.erp_system.user.domain;
 
+import kamil.kowalczyk.erp_system.common.infrastructure.security.JwtService;
+import kamil.kowalczyk.erp_system.user.domain.dto.LoginUserDto;
 import kamil.kowalczyk.erp_system.user.domain.dto.RegisterUserDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,8 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -25,14 +31,21 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private UserService userService;
 
+    private final String FAKE_PEPPER = "testPepper";
+
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(userService, "pepper", "TestPepper");
+        ReflectionTestUtils.setField(userService, "pepper", FAKE_PEPPER);
     }
 
+
+    //Rejestracja ----------------------------------------------------------
     @Test
     void shouldRegisterUserSuccessfuly() {
         RegisterUserDto dto = new RegisterUserDto(
@@ -45,16 +58,80 @@ class UserServiceTest {
         savedUser.setId(1L);
         savedUser.setActive(true);
 
-        Mockito.when(userRepository.existsByUsername(dto.username())).thenReturn(false);
-        Mockito.when(userRepository.existsByEmail(dto.email())).thenReturn(false);
+        when(userRepository.existsByUsername(dto.username())).thenReturn(false);
+        when(userRepository.existsByEmail(dto.email())).thenReturn(false);
 
-        Mockito.when(passwordEncoder.encode(anyString())).thenReturn("mojetajnehaslo123");
+        when(passwordEncoder.encode(anyString())).thenReturn("mojetajnehaslo123");
 
-        Mockito.when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         Long resultId = userService.registerUser(dto);
         Assertions.assertEquals(1L,resultId);
         Mockito.verify(userRepository, Mockito.times(1)).save(any(User.class));
         Mockito.verify(passwordEncoder, Mockito.times(1)).encode(anyString());
+    }
+
+    //Logowanie Happy End----------------------------------------------------------
+    @Test
+    void shouldLoginUserSuccessfully() {
+        LoginUserDto dto = new LoginUserDto("jan@test.pl", "haslo123");
+
+        User userFromDb = new User();
+        userFromDb.setEmail("jan@test.pl");
+        userFromDb.setPassword("encoded_password_from_db");
+        userFromDb.setActive(true);
+
+        when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(userFromDb));
+
+        when(passwordEncoder.matches("haslo123" + FAKE_PEPPER, "encoded_password_from_db"))
+                .thenReturn(true);
+
+        when(jwtService.generateToken(userFromDb)).thenReturn("super_tajny_token_jwt");
+
+        String token = userService.loginUser(dto);
+
+        assertEquals("super_tajny_token_jwt", token);
+
+        verify(passwordEncoder).matches(eq("haslo123" + FAKE_PEPPER), anyString());
+    }
+
+    //Złe hasło
+    @Test
+    void shouldThrowException_WhenPasswordIsInvalid() {
+        LoginUserDto dto = new LoginUserDto("jan@test.pl", "zle_haslo");
+
+        User userFromDb = new User();
+        userFromDb.setEmail("jan@test.pl");
+        userFromDb.setPassword("poprawny_hash");
+
+        when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(userFromDb));
+
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.loginUser(dto));
+
+        assertEquals("Błędny email lub hasło", ex.getMessage());
+        verifyNoInteractions(jwtService);
+    }
+
+    //Konto nie aktywne
+    @Test
+    void shouldThrowException_WhenAccountIsInactive() {
+        LoginUserDto dto = new LoginUserDto("jan@test.pl", "haslo123");
+
+        User userFromDb = new User();
+        userFromDb.setEmail("jan@test.pl");
+        userFromDb.setPassword("hash");
+        userFromDb.setActive(false);
+
+        when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(userFromDb));
+
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.loginUser(dto));
+
+        assertEquals("Konto nie jest aktywowane", ex.getMessage());
+
+        verifyNoInteractions(jwtService);
     }
 }

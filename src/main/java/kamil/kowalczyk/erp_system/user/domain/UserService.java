@@ -1,5 +1,7 @@
 package kamil.kowalczyk.erp_system.user.domain;
 
+import kamil.kowalczyk.erp_system.common.infrastructure.security.JwtService;
+import kamil.kowalczyk.erp_system.user.domain.dto.LoginUserDto;
 import kamil.kowalczyk.erp_system.user.domain.dto.RegisterUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Value("${app.security.pepper}")
     private String pepper;
@@ -40,5 +43,22 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         return savedUser.getId();
+    }
+
+    public String loginUser(LoginUserDto dto) {
+        User user = userRepository.findByEmail(dto.email())
+                .orElseThrow(() -> new RuntimeException("Błędny email lub hasło"));
+
+        String passwordWithPepper = dto.password() + pepper;
+
+        if(!passwordEncoder.matches(passwordWithPepper, user.getPassword())) {
+            throw new RuntimeException("Błędny email lub hasło");
+        }
+
+        if(!user.isActive()) {
+            throw new RuntimeException("Konto nie jest aktywowane");
+        }
+
+        return jwtService.generateToken(user);
     }
 }
