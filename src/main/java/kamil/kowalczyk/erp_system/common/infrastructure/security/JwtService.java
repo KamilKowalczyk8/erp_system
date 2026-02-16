@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import kamil.kowalczyk.erp_system.user.domain.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -43,10 +44,10 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, User user) {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         final String email = extractEmail(token);
 
-        return (email.equals(user.getEmail())) && !isTokenExpired(token);
+        return (email.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     public String extractEmail(String token) {

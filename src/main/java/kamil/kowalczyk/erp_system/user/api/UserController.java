@@ -7,18 +7,21 @@ import kamil.kowalczyk.erp_system.user.domain.UserService;
 import kamil.kowalczyk.erp_system.user.domain.dto.LoginUserDto;
 import kamil.kowalczyk.erp_system.user.domain.dto.RegisterUserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseCookie;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 class UserController {
     private final UserService userService;
+
+    @Value("${app.security.jwt.expiration}")
+    private long jwtExpiration;
 
     @PostMapping("/register")
     @Operation(summary = "Rejestracja użytkownika", description = "Rejestruje nowego użytkownika")
@@ -28,9 +31,21 @@ class UserController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Logowanie użytkownika", description = "Logujemy użytkownika do systemu")
-    ResponseEntity<String> loginUser(@RequestBody @Valid LoginUserDto dto) {
+    @Operation(summary = "Logowanie użytkownika", description = "Logujemy użytkownika do systemu oraz zwaracamy jego token")
+    ResponseEntity<?> loginUser(@RequestBody @Valid LoginUserDto dto) {
         String token = userService.loginUser(dto);
-        return ResponseEntity.ok(token);
+
+        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", token)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(jwtExpiration / 1000)
+                //.sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body("Zalogowano pomyślnie");
+
     }
 }
