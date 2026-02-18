@@ -1,5 +1,6 @@
 package kamil.kowalczyk.erp_system.common.infrastructure.security;
 
+import kamil.kowalczyk.erp_system.user.domain.CustomUserDetailsService;
 import kamil.kowalczyk.erp_system.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,19 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final UserRepository userRepository;
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found"));
-    }
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
+
         DaoAuthenticationProvider authProvider =
-                new DaoAuthenticationProvider(userDetailsService());
+                new DaoAuthenticationProvider(customUserDetailsService);
 
         authProvider.setPasswordEncoder(passwordEncoder());
 
