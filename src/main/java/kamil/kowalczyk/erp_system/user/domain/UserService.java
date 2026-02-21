@@ -61,4 +61,9 @@ public class UserService {
 
         return jwtService.generateToken(user);
     }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono użytkowmnika"));
+    }
 }

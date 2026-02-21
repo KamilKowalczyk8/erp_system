@@ -42,6 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             for (Cookie cookie : request.getCookies()) {
                 if ("accessToken".equals(cookie.getName())) {
                     jwtToken = cookie.getValue();
+                    System.out.println("---> ZNALEZIONO CIASTECZKO: " + jwtToken.substring(0, 10) + "..."); // TEST 2
                     break;
                 }
             }
