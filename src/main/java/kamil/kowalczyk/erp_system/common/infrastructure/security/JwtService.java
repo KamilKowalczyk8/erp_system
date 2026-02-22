@@ -51,12 +51,10 @@ public class JwtService {
     }
 
     public String extractEmail(String token) {
-        // Wyciągamy pole Subject email
         return extractClaim(token, Claims::getSubject);
     }
 
     private Date extractExpiration(String token) {
-        // Pobieramy date ważności
         return extractClaim(token, Claims::getExpiration);
     }
 
