@@ -66,7 +66,7 @@ public class SecurityConfigDev {
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
 
         // Pozwalamy na wszystkie metody (GET, POST, PUT, DELETE, OPTIONS)
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // Pozwalamy na przesyłanie nagłówków (np. Content-Type, Authorization)
         configuration.setAllowedHeaders(List.of("*"));

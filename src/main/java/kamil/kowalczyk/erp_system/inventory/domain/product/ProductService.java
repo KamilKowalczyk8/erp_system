@@ -105,6 +105,32 @@ public class ProductService {
         product.setStockQuantity(newQuantity);
     }
 
+    public void deleteProduct(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Nie znaleziono produktu");
+        }
+        productRepository.deleteById(id);
+    }
+
+    public ProductDto editProductDetails(Long id, CreateProductDto dto) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produkt nie istnieje"));
+
+        product.setName(dto.name());
+        product.setPrice(dto.price());
+
+        if (!product.getSkuCode().equals(dto.skuCode()) && productRepository.existsBySkuCode(dto.skuCode())){
+            throw new ProductAlreadyExistsException(dto.skuCode());
+        }
+        product.setSkuCode(dto.skuCode());
+
+        product.setUpdatedAt(LocalDateTime.now());
+
+        Product savedProduct = productRepository.save(product);
+
+        return mapToDto(savedProduct);
+    }
+
     private ProductDto mapToDto(Product product) {
         return new ProductDto(
                 product.getId(),

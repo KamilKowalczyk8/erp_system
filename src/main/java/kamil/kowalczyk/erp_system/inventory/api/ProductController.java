@@ -46,6 +46,22 @@ class ProductController {
         return ResponseEntity.ok(productService.getProduct(id));
     }
 
+    @PutMapping("/{id}")
+    @Operation(summary = "Edytuj dane produktu", description = "Pozwala zmienić nazwę, cenę i SKU produktu.")
+    ResponseEntity<ProductDto> editProduct(
+            @PathVariable Long id,
+            @RequestBody @Valid CreateProductDto dto
+    ) {
+        return ResponseEntity.ok(productService.editProductDetails(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Usuwanie danego produktu", description = "Usuwa dany produkt po id")
+    ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PatchMapping("/{id}/stock")
     @Operation(summary = "Zaktualizuj stan magazynowy", description = "Dodatnia wartość -> Dostawa. Ujemna wartość -> Wydanie.")

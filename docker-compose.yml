@@ -48,7 +48,7 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - erp_backend
+      - app
 
 
   grafana:
