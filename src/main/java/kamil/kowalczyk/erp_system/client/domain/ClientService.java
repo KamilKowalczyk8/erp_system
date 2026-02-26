@@ -15,11 +15,11 @@ public class ClientService {
         this.clientRepository = clientRepository;
     }
 
-    public Long createClient(CreateClientDto dto) {
+    public Long createClient(Long userId, CreateClientDto dto) {
         Client client = new Client(
+                userId,
                 dto.firstName(),
                 dto.lastName(),
-                dto.email(),
                 dto.phoneNumber()
         );
         return clientRepository.save(client).getId();

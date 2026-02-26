@@ -49,16 +49,14 @@ class UserServiceTest {
     @Test
     void shouldRegisterUserSuccessfuly() {
         RegisterUserDto dto = new RegisterUserDto(
-                "kamil_admin",
                 "kamil@firma.pl",
                 "mojetajnehaslo123"
         );
 
-        User savedUser = new User("kamil_admin", "mojetajnehaslo123" ,"kamil@firma.pl",Role.USER );
+        User savedUser = new User("mojetajnehaslo123" ,"kamil@firma.pl",Role.USER );
         savedUser.setId(1L);
         savedUser.setActive(true);
 
-        when(userRepository.existsByUsername(dto.username())).thenReturn(false);
         when(userRepository.existsByEmail(dto.email())).thenReturn(false);
 
         when(passwordEncoder.encode(anyString())).thenReturn("mojetajnehaslo123");

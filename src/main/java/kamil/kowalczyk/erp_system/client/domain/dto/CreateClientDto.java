@@ -14,10 +14,6 @@ public record CreateClientDto(
         @NotBlank(message = "Nazwisko jest wymagane")
         String lastName,
 
-        @NotBlank(message = "Email jest wymagany")
-        @Email(message = "Niepoprawny format adresu email")
-        String email,
-
         @Pattern(regexp = "\\d{9}", message = "Telefon musi składać się z 9 cyfr (np. 123456789")
         String phoneNumber
 

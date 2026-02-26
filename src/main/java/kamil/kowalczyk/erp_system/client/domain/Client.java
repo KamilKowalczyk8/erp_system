@@ -11,22 +11,26 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "clients")
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id", nullable = false, unique = true)
+    private Long userId;
+
     private String firstName;
     private String lastName;
-    private String email;
+
     private String phoneNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Client(String firstName, String lastName, String email, String phoneNumber) {
+    public Client(Long userId, String firstName, String lastName, String phoneNumber) {
+        this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
         this.phoneNumber = phoneNumber;
     }
 

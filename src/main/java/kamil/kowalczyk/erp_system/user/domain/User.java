@@ -23,9 +23,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
     @Column(nullable = false)
     private String password;
 
@@ -44,8 +41,7 @@ public class User {
 
     private LocalDateTime updatedAt;
 
-    public User(String username, String password, String email, Role role) {
-        this.username = username;
+    public User(String password, String email, Role role) {
         this.password = password;
         this.email = email;
         this.role = role;

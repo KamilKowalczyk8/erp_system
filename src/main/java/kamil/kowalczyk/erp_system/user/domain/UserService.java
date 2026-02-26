@@ -22,9 +22,6 @@ public class UserService {
     private String pepper;
 
     public Long registerUser(RegisterUserDto dto) {
-        if (userRepository.existsByUsername(dto.username())) {
-            throw new RuntimeException("Nazwa użytkownika jest już zajęta");
-        }
         if (userRepository.existsByEmail(dto.email())) {
             throw new RuntimeException("Ten email jest już zajęty");
         }
@@ -33,7 +30,6 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(passwordWithPepper);
 
         User user = new User();
-        user.setUsername(dto.username());
         user.setPassword(hashedPassword);
         user.setEmail(dto.email());
 
