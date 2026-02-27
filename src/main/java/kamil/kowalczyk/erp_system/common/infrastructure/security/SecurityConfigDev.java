@@ -44,6 +44,7 @@ public class SecurityConfigDev {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/clients/register",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**"
                         ).permitAll()

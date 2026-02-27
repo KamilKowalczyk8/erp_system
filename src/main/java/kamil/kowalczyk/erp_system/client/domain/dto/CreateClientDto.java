@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateClientDto(
 
+
         @NotBlank(message = "Imię jest wymagane")
         @Size(max = 50, message = "Imie może mieć maksymalnie 50 znaków")
         String firstName,

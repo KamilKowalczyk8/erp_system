@@ -124,7 +124,6 @@ public class OrderService {
                 order.getStatus(),
                 order.getClient().getId(),
                 order.getClient().getFirstName() + " " + order.getClient().getLastName(),
-                order.getClient().getEmail(),
                 itemDtos,
                 finalOrderValue
         );

@@ -11,8 +11,8 @@ public record RegisterClientRequestDto(
         String email,
 
         @NotBlank(message = "Hasło jest wymagane")
-        @Size(min = 8, message = "Hasło musi mieć co najmniej 8 znaków") // ZMIENIONE NA 8
-        String password, // Tu zostawiamy "password", bo tak wpisze użytkownik na stronie
+        @Size(min = 8, message = "Hasło musi mieć co najmniej 8 znaków")
+        String password,
 
         @NotBlank(message = "Imię jest wymagane")
         @Size(max = 50, message = "Imię może mieć maksymalnie 50 znaków")

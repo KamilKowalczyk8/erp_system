@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/clients")
+@RequestMapping("/api/clients/client")
 @Tag(name = "Klienci", description = "Zarządzanie bazą klientów (CRM)")
 class ClientController {
 
@@ -24,11 +24,11 @@ class ClientController {
 
     @PostMapping
     @Operation(summary = "Dodaj nowego klienta", description = "Zwraca ID nowo utworzonego klienta.")
-    ResponseEntity<Long> createClient(@RequestBody @Valid CreateClientDto dto) {
-        Long clientId = clientService.createClient(dto);
+    ResponseEntity<Long> createClient(@RequestBody @Valid Long userId, CreateClientDto dto) {
+        Long clientId = clientService.createClient(userId, dto);
 
         return ResponseEntity
-                .created(URI.create("/api/clients/" + clientId))
+                .created(URI.create("/api/clients/client" + clientId))
                 .body(clientId);
     }
 

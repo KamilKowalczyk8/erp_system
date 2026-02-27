@@ -13,7 +13,6 @@ public record OrderDto(
 
         Long clientId,
         String clientName,
-        String clientEmail,
 
         List<OrderItemDto> items,
         BigDecimal totalOrderValue
