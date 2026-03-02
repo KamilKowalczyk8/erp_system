@@ -65,7 +65,8 @@ public class UserController {
 
         return ResponseEntity.ok(Map.of(
                 "email", email,
-                "username", user.getEmail()
+                "username", user.getEmail(),
+                "role", user.getRole().name()
         ));
     }
 }

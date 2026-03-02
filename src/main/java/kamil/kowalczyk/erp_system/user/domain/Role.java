@@ -4,6 +4,6 @@ public enum Role {
     ADMIN,
     SALES,
     USER,
-    Client,
+    CLIENT,
     WAREHOUSE
 }
