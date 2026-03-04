@@ -1,10 +1,14 @@
 package kamil.kowalczyk.erp_system.sales.domain.order;
 
+import jakarta.persistence.EntityNotFoundException;
 import kamil.kowalczyk.erp_system.client.domain.Client;
 import kamil.kowalczyk.erp_system.client.domain.ClientService;
 import kamil.kowalczyk.erp_system.inventory.domain.product.ProductService;
 import kamil.kowalczyk.erp_system.inventory.domain.product.dto.ProductDto;
 import kamil.kowalczyk.erp_system.sales.domain.order.dto.*;
+import kamil.kowalczyk.erp_system.user.domain.User;
+import kamil.kowalczyk.erp_system.user.domain.UserRepository;
+import kamil.kowalczyk.erp_system.user.domain.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,15 +24,22 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductService productService;
     private final ClientService clientService;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
-    public OrderService(OrderRepository orderRepository, ProductService productService, ClientService clientService) {
+    public OrderService(OrderRepository orderRepository, ProductService productService, ClientService clientService, UserService userService, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.clientService = clientService;
+        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
-    public Long placeOrder(CreateOrderDto dto) {
-        Client client = clientService.getClient(dto.clientId());
+    public Long placeOrder(String email, CreateOrderDto dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Nie znaleziono użytkownika"));
+        Client client = clientService.getClientByUserId(user.getId());
+
         Order order = new Order(client, OrderStatus.NEW);
 
         for (CreateOrderItemDto itemDto : dto.items()) {

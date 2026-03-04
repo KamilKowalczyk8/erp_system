@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -32,8 +33,12 @@ class OrderController {
 
     @PostMapping
     @Operation(summary = "Złóż nowe zamówienie", description = "Przyjmuje listę produktów i ilości. Automatycznie zdejmuje towar ze stanu magazynowego.")
-    ResponseEntity<Long> createOrder(@RequestBody @Valid CreateOrderDto dto) {
-        Long orderId = orderService.placeOrder(dto);
+    ResponseEntity<Long> createOrder(
+            @RequestBody @Valid CreateOrderDto dto,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+        Long orderId = orderService.placeOrder(email, dto);
         return ResponseEntity
                 .created(URI.create("/api/sales/orders/" + orderId))
                 .body(orderId);

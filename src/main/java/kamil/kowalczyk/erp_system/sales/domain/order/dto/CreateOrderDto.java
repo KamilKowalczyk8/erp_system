@@ -7,10 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record CreateOrderDto(
-
-        @NotNull(message = "Musisz podać ID klienta")
-        Long clientId,
-
         @NotEmpty(message = "Zamówienie musi zawierać przynajmnije jedną pozycję")
         @Valid
         List<CreateOrderItemDto> items

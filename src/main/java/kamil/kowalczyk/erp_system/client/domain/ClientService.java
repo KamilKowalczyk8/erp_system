@@ -1,5 +1,6 @@
 package kamil.kowalczyk.erp_system.client.domain;
 
+import jakarta.persistence.EntityNotFoundException;
 import kamil.kowalczyk.erp_system.client.domain.dto.CreateClientDto;
 import kamil.kowalczyk.erp_system.common.infrastructure.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,11 @@ public class ClientService {
     public Client getClient(Long id) {
         return clientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Klient o id " + id + " nie istnieje!"));
+    }
+
+    public Client getClientByUserId(Long userId) {
+        return clientRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Błąd: Nie znaleziono profilu klienta przypisanego do konta (userId: "+ userId + ")"));
     }
 
 
